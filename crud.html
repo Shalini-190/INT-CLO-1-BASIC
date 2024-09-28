@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase CRUD</title>
+   
+  <style>
+    /* Basic Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Body styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #00bcd4, #4caf50);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Header styling */
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 24px;
+    }
+
+    /* Container for the form */
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    /* Form element styling */
+    label {
+      display: block;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: #00bcd4;
+      outline: none;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #388e3c;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:nth-child(odd) {
+      background-color: #00bcd4;
+    }
+
+    button:nth-child(odd):hover {
+      background-color: #0288d1;
+    }
+
+    button + button {
+      margin-top: 10px;
+    }
+
+    /* Footer styling */
+    footer {
+      margin-top: 20px;
+      color: #fff;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Employee Database</h1>
+    <h2>Manage Your Employees</h2>
+  </header>
+
+  <div class="container">
+    <label>First Name</label>
+    <input type="text" id="FnameInp"> 
+
+    <label>Last Name</label>
+    <input type="text" id="LnameInp">
+
+    <label>Department</label>
+    <select id="DeptInp">
+      <option value="Development">Development</option>
+      <option value="Testing">Testing</option>
+      <option value="Management">Management</option>
+      <option value="Administration">Administration</option> 
+    </select>
+
+    <label>Can Swim</label>
+    <select id="SwimInp">
+      <option value="yes">Yes</option> 
+      <option value="no">No</option>
+    </select>
+
+    <label>CNIC No</label>
+    <input type="number" id="CnicInp">
+
+    <button id="AddBtn">Add</button> 
+    <button id="RetBtn">Retrieve</button> 
+    <button id="UpdBtn">Update</button>
+    <button id="DelBtn">Delete</button>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Your Company Name. All Rights Reserved.</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+    import { getDatabase, ref, child, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDMrPeZme3bzYnAbkSjjU7FDP0t54QzeRA",
+      authDomain: "cloud-db-crud.firebaseapp.com",
+      databaseURL: "https://cloud-db-crud-default-rtdb.firebaseio.com",
+      projectId: "cloud-db-crud",
+      storageBucket: "cloud-db-crud.appspot.com",
+      messagingSenderId: "139751117900",
+      appId: "1:139751117900:web:7977cfe37a14d8d4f750e9",
+      measurementId: "G-GLZR820GY5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
+
+    let FnameInp = document.getElementById('FnameInp'); 
+    let LnameInp = document.getElementById('LnameInp'); 
+    let DeptInp = document.getElementById('DeptInp'); 
+    let SwimInp = document.getElementById('SwimInp'); 
+    let CnicInp = document.getElementById('CnicInp');
+
+    let AddBtn = document.getElementById('AddBtn'); 
+    let RetBtn = document.getElementById('RetBtn'); 
+    let UpdBtn = document.getElementById('UpdBtn'); 
+    let DelBtn = document.getElementById('DelBtn');
+
+    function AddData() {
+      set(ref(db, 'EmployeeSet/' + CnicInp.value), {
+        nameofemployee: {
+          firstname: FnameInp.value, 
+          lastname: LnameInp.value
+        }, 
+        department: DeptInp.value,
+        canswim: (SwimInp.value === "yes"),
+        cnic: Number(CnicInp.value)
+      })
+      .then(() => {
+        alert("Data Added Successfully");
+      })
+      .catch((error) => {
+        alert("Unsuccessful");
+        console.log(error);
+      });
+    }
+
+    function RetData() {
+      const dbRef = ref(db);
+      get(child(dbRef, 'EmployeeSet/' + CnicInp.value)).then((snapshot) => {
+        if (snapshot.exists()) {
+          FnameInp.value = snapshot.val().nameofemployee.firstname;
+          LnameInp.value = snapshot.val().nameofemployee.lastname;
+          DeptInp.value = snapshot.val().department; 
+          SwimInp.value = snapshot.val().canswim ? "yes" : "no";
+        } else {
+          alert("No data found!");
+        }
+      })
+      .catch((error) => {
+        alert("Unsuccessful"); 
+        console.log(error);
+      });
+    }
+
+    function UpdateData() {
+      update(ref(db, 'EmployeeSet/' + CnicInp.value), {
+        nameofemployee: {
+          firstname: FnameInp.value, 
+          lastname: LnameInp.value
+        }, 
+        department: DeptInp.value,
+        canswim: (SwimInp.value === "yes"),
+      })
+      .then(() => {
+        alert("Data Updated Successfully");
+      })
+      .catch((error) => {
+        alert("Unsuccessful");
+        console.log(error);
+      });
+    }
+
+    function DeleteData() {
+      remove(ref(db, 'EmployeeSet/' + CnicInp.value))
+      .then(() => {
+        alert("Data Deleted Successfully");
+      })
+      .catch((error) => {
+        alert("Unsuccessful");
+        console.log(error);
+      });
+    }
+    
+    AddBtn.addEventListener('click', AddData);
+    RetBtn.addEventListener('click', RetData);
+    UpdBtn.addEventListener('click', UpdateData);
+    DelBtn.addEventListener('click', DeleteData);
+  </script>
+</body>
+</html>
